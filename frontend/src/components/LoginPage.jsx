@@ -8,7 +8,6 @@ import {
   Card,
   FloatingLabel,
 } from "react-bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as yup from "yup";
 
@@ -22,9 +21,6 @@ const generateOnSubmit = (changeValidState, schema) => async (values) => {
 };
 
 const LoginPage = () => {
-  const navigate = useNavigate;
-  const location = useLocation;
-
   const [isInvalid, changeValidState] = useState(false);
 
   const schema = yup.object().shape({
