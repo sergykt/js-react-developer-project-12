@@ -4,13 +4,11 @@ import {
   Routes,
   Route,
   Link,
-  Navigate,
-  useLocation,
 } from 'react-router-dom';
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
 
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Container } from 'react-bootstrap';
 
 const App = () => (
   <BrowserRouter>

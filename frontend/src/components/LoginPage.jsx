@@ -13,7 +13,7 @@ import * as yup from "yup";
 
 const generateOnSubmit = (changeValidState, schema) => async (values) => {
   try {
-    const user = await schema.validate(values);
+    await schema.validate(values);
     changeValidState(false);
   } catch (e) {
     changeValidState(true);
