@@ -8,27 +8,52 @@ import {
   Card,
   FloatingLabel,
 } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
+import useAuth from "../hooks/index.jsx";
+import routes from "../routes.js";
 import * as yup from "yup";
+import axios from "axios";
 
-const generateOnSubmit = (changeValidState, schema) => async (values) => {
-  try {
-    await schema.validate(values);
-    changeValidState(false);
-  } catch (e) {
-    changeValidState(true);
-  }
-};
+const generateOnSubmit =
+  (setAuthFailed, auth, navigate, location, schema) => async (values) => {
+    setAuthFailed(false);
+    try {
+      await schema.validate(values);
+      const responce = await axios.post(routes.loginPath(), values);
+      localStorage.setItem("userId", JSON.stringify(responce.data));
+      auth.logIn();
+      console.log(location);
+      const { from } = location.state || { from: { pathname: "/" } };
+      navigate(from);
+    } catch (err) {
+      setAuthFailed(false);
+      if (err.isAxiosError && err.response.status === 401) {
+        setAuthFailed(true);
+        return;
+      }
+      throw err;
+    }
+  };
 
 const LoginPage = () => {
-  const [isInvalid, changeValidState] = useState(false);
+  const [authFailed, setAuthFailed] = useState(false);
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const schema = yup.object().shape({
-    username: yup.string().trim().min(4).required(),
-    password: yup.string().required().min(6),
+    username: yup.string().trim().required(),
+    password: yup.string().required(),
   });
 
-  const onSubmit = generateOnSubmit(changeValidState, schema);
+  const onSubmit = generateOnSubmit(
+    setAuthFailed,
+    auth,
+    navigate,
+    location,
+    schema
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -45,18 +70,22 @@ const LoginPage = () => {
 
   return (
     <Container fluid className="h-100">
-      <Row className="justify-content-center align-content-center h-100 mt-3">
+      <Row className="justify-content-center align-content-center h-100">
         <Col md={8} xxl={6} xs={12}>
           <Card className="shadow-sm">
             <Card.Body className="row p-5">
               <div className="col-12 col-md-6 d-flex align-items-center justify-content-center">
-                <img src="/img/avatar.jpg" class="rounded-circle" alt="Войти" />
+                <img
+                  src="/img/avatar.jpg"
+                  className="rounded-circle"
+                  alt="Войти"
+                />
               </div>
               <Form
                 onSubmit={formik.handleSubmit}
                 className="col-12 col-md-6 mt-3 mt-mb-0"
               >
-                <h1 class="text-center mb-4">Войти</h1>
+                <h1 className="text-center mb-4">Войти</h1>
                 <Form.Group>
                   <FloatingLabel
                     controlId="username"
@@ -68,10 +97,9 @@ const LoginPage = () => {
                       name="username"
                       autoComplete="username"
                       required
-                      id="username"
                       placeholder="Ваш ник"
                       onChange={formik.handleChange}
-                      isInvalid={isInvalid}
+                      isInvalid={authFailed}
                       value={formik.values.username}
                     />
                   </FloatingLabel>
@@ -87,13 +115,12 @@ const LoginPage = () => {
                       name="password"
                       autoComplete="current-password"
                       required
-                      id="password"
                       placeholder="Пароль"
                       onChange={formik.handleChange}
-                      isInvalid={isInvalid}
+                      isInvalid={authFailed}
                       value={formik.values.password}
                     />
-                    <Form.Control.Feedback type="invalid">
+                    <Form.Control.Feedback tooltip type="invalid">
                       Неверные имя или пароль
                     </Form.Control.Feedback>
                   </FloatingLabel>
