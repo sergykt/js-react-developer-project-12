@@ -23,8 +23,7 @@ const generateOnSubmit =
       const responce = await axios.post(routes.loginPath(), values);
       localStorage.setItem("userId", JSON.stringify(responce.data));
       auth.logIn();
-      console.log(location);
-      const { from } = location.state || { from: { pathname: "/" } };
+      const from = { pathname: "/" };
       navigate(from);
     } catch (err) {
       setAuthFailed(false);
@@ -57,8 +56,8 @@ const LoginPage = () => {
 
   const formik = useFormik({
     initialValues: {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
     },
     onSubmit,
   });
