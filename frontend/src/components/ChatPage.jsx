@@ -10,7 +10,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     dispatch(fetchData());
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Container className="rounded shadow h-100 my-4 overflow-hidden">
