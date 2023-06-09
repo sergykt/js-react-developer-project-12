@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -7,21 +7,31 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { Navbar, Container } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import LoginPage from "./LoginPage.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
 import ChatPage from "./ChatPage.jsx";
+
 import AuthContext from "../contexts/index.jsx";
 import useAuth from "../hooks/index.jsx";
-import { Navbar, Container } from "react-bootstrap";
+
+
+import { socket } from "../socket";
+import { actions as messagesActions } from "../slices/messagesSlice";
+import { actions as channelsActions } from "../slices/channelsSlice.js";
 
 const AuthProvider = ({ children }) => {
-  const userId = JSON.parse(localStorage.getItem('userId'));
-  const logState = (userId && userId.token);
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const logState = userId && userId.token;
   const [loggedIn, setLoggedIn] = useState(logState);
-  
+
   const logIn = () => setLoggedIn(true);
   const logOut = () => {
-    localStorage.removeItem('userId');
+    localStorage.removeItem("userId");
     setLoggedIn(false);
   };
 
@@ -36,39 +46,69 @@ const PrivateRoute = ({ children }) => {
   const auth = useAuth();
   const location = useLocation();
 
-  return (auth.loggedIn)? (
+  return auth.loggedIn ? (
     children
   ) : (
     <Navigate to="/login" state={{ from: location }} />
   );
 };
 
-const App = () => (
-  <AuthProvider>
-    <BrowserRouter>
-      <div className="d-flex flex-column h-100">
-        <Navbar bg="white" expand="lg" className="shadow-sm">
-          <Container>
-            <Navbar.Brand as={Link} to="/">
-              Hexlet Chat
-            </Navbar.Brand>
-          </Container>
-        </Navbar>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <ChatPage />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
-  </AuthProvider>
-);
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleDisconnect = () => {
+      toast.error('Нет соединения');
+    };
+
+    const handleNewMessage = (payload) => {
+      dispatch(messagesActions.addMessage(payload));
+    };
+
+    const handleNewChannel = (payload) => {
+      dispatch(channelsActions.addChannel(payload));
+      dispatch(channelsActions.changeChannel(payload.id));
+    };
+
+    socket.on('disconnect', handleDisconnect);
+    socket.on('newMessage', handleNewMessage);
+    socket.on('newChannel', handleNewChannel);
+  
+    return () => {
+      socket.off('disconnect', handleDisconnect);
+      socket.off('newMessage', handleNewMessage);
+      socket.off('newChannel', handleNewChannel);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="d-flex flex-column h-100">
+          <Navbar bg="white" expand="lg" className="shadow-sm">
+            <Container>
+              <Navbar.Brand as={Link} to="/">
+                Hexlet Chat
+              </Navbar.Brand>
+            </Container>
+          </Navbar>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <ChatPage />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+        <ToastContainer />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+};
 
 export default App;

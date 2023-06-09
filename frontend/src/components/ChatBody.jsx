@@ -1,44 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { Form } from "react-bootstrap";
 import cn from 'classnames';
 import { socket } from "../socket";
-import { actions as messagesActions } from "../slices/messagesSlice";
 
 const ChatBody = () => {
-  const [isConnected, setIsConnected] = useState(socket.connected);
-
-  const dispatch = useDispatch();
   const inputEl = useRef();
 
   useEffect(() => {
     inputEl.current.focus();
   });
-
-  useEffect(() => {
-    const handleConnect = () => {
-      setIsConnected(true);
-      console.log('есть соединение');
-    };
-  
-    const handleDisconnect = () => {
-      setIsConnected(false);
-      console.log('проблемы с соединением');
-    };
-
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-
-    socket.on('newMessage', (payload) => {
-      dispatch(messagesActions.addMessage(payload));
-    });
-  
-    return () => {
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { channels, currentChannelId } = useSelector((state) => state.channelsReducer);
   const { messages } = useSelector((state) => state.messagesReducer);
@@ -101,7 +73,7 @@ const ChatBody = () => {
               value={formik.values.body}
               onChange={formik.handleChange}
               className="border-0 p-0 ps-2"
-              isInvalid={!isConnected}
+              //isInvalid={!isConnected}
             />
             <Form.Control.Feedback tooltip type="invalid">
               Ошибка соединения
