@@ -1,14 +1,44 @@
-import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { Form } from "react-bootstrap";
-import _ from 'lodash';
+import cn from 'classnames';
+import { socket } from "../socket";
+import { actions as messagesActions } from "../slices/messagesSlice";
 
 const ChatBody = () => {
+  const [isConnected, setIsConnected] = useState(socket.connected);
+
+  const dispatch = useDispatch();
   const inputEl = useRef();
+
   useEffect(() => {
     inputEl.current.focus();
   });
+
+  useEffect(() => {
+    const handleConnect = () => {
+      setIsConnected(true);
+      console.log('есть соединение');
+    };
+  
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      console.log('проблемы с соединением');
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+
+    socket.on('newMessage', (payload) => {
+      dispatch(messagesActions.addMessage(payload));
+    });
+  
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { channels, currentChannelId } = useSelector((state) => state.channelsReducer);
   const { messages } = useSelector((state) => state.messagesReducer);
@@ -27,12 +57,18 @@ const ChatBody = () => {
       const newMessage = {
         body: values.body,
         channelId: currentChannelId,
-        id: _.uniqueId(),
         username,
       };
-      console.log(newMessage);
+      socket.emit('newMessage', newMessage, (response) => {
+        console.log(response.status);
+      });
+    
       resetForm();
     },
+  });
+
+  const formGroupClass = cn('input-group', {
+    'has-validation': formik.values.body === '',
   });
 
   return (
@@ -56,21 +92,24 @@ const ChatBody = () => {
           className="py-1 border rounded-2"
           noValidate
         >
-          <Form.Group className="input-group">
+          <Form.Group className={formGroupClass}>
             <Form.Control
               ref={inputEl}
+              aria-label="Новое сообщение"
               name="body"
-              required
-              type="text"
               placeholder="Введите сообщение..."
               value={formik.values.body}
               onChange={formik.handleChange}
-              className="border-0 p-0 ps-2 form-control"
+              className="border-0 p-0 ps-2"
+              isInvalid={!isConnected}
             />
+            <Form.Control.Feedback tooltip type="invalid">
+              Ошибка соединения
+            </Form.Control.Feedback>
             <button
               type="submit"
-              disabled=""
-              className="btn btn-group-vertical"
+              disabled={formik.values.body === ''}
+              className="btn btn-group-vertical border-0"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
