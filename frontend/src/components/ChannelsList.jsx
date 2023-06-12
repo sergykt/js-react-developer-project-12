@@ -1,27 +1,12 @@
-import { useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import cn from "classnames";
-import { actions } from "../slices/channelsSlice";
-import getModal from '../modals';
-
-const renderModal = (modalInfo, hideModal) => {
-  const ModalForm = getModal(modalInfo.type);
-  if (!ModalForm) {
-    return null;
-  }
-
-  return (
-    <ModalForm onHide={hideModal} modalInfo={modalInfo} />
-  );
-};
+import { actions } from "../slices/index.js";
+import { getChannels } from "../slices/selectors.js";
+import Modal from "../modals/Modal.jsx";
+import ChannelButton from "./ChannelButton.jsx";
 
 const ChannelsList = () => {
   const dispatch = useDispatch();
-  const { channels, currentChannelId } = useSelector((state) => state.channelsReducer);
-
-  const [modalInfo, setModalInfo] = useState({ type: null, channelName: null });
-  const hideModal = () => setModalInfo({ type: null, channelName: null });
-  const showModal = (type, channelName = null) => setModalInfo({ type, channelName });
+  const channels = useSelector(getChannels);
 
   return (
     <>
@@ -30,7 +15,7 @@ const ChannelsList = () => {
         <button
           type="button"
           className="p-0 text-primary btn btn-group-vertical"
-          onClick={() => showModal('adding')}
+          onClick={() => dispatch(actions.setModalAdd())}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -49,26 +34,13 @@ const ChannelsList = () => {
         id="channels-box"
         className="nav flex-column nav-pills nav-fill px-2 mb-3 overflow-auto h-100 d-block"
       >
-        {channels.map(({ id, name }) => {
-          const buttonClass = cn("w-100", "rounded-0", "text-start", "btn", {
-            "btn-secondary": id === currentChannelId,
-          });
-
-          return (
-            <li className="nav-item w-100" key={id}>
-              <button
-                type="button"
-                className={buttonClass}
-                onClick={() => dispatch(actions.changeChannel(id))}
-              >
-                <span className="me-1">#</span>
-                {name}
-              </button>
-            </li>
-          );
-        })}
+        {channels.map(({ id, name, removable }) => (
+          <li className="nav-item w-100" key={id}>
+            <ChannelButton id={id} name={name} removable={removable} />
+          </li>
+        ))}
       </ul>
-      {renderModal(modalInfo, hideModal)}
+      <Modal />
     </>
   );
 };

@@ -1,58 +1,55 @@
-import { useEffect, useRef } from "react";
-import { useFormik } from "formik";
-import { Modal, FormGroup, FormControl, FormLabel } from "react-bootstrap";
-import { socket } from "../socket";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { Modal } from "react-bootstrap";
+import { useApi } from "../hooks/index.jsx";
+import { getExtraId } from "../slices/selectors.js";
+import { toast } from "react-toastify";
 
-// BEGIN (write your solution here)
-const Add = ({ onHide }) => {
-  const inputEl = useRef();
+const Remove = ({ handleClose }) => {
+  const api = useApi();
+  const [loading, setLoading] = useState(false);
+  const id = useSelector(getExtraId);
+  const data = { id };
 
-  useEffect(() => {
-    inputEl.current.focus();
-  }, []);
-
-  const formik = useFormik({
-    initialValues: {
-      name: '',
-    },
-    onSubmit: ({ name }) => {
-      socket.emit('newChannel', { name });
-      onHide();
-    },
-  });
+  const onSubmit = async () => {
+    setLoading(true);
+    try {
+      await api.removeChannel(data);
+      toast.success("Канал удален");
+      handleClose();
+    } catch (e) {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Modal show onHide={onHide} centered>
+    <>
       <Modal.Header closeButton>
-        <Modal.Title>Добавить канал</Modal.Title>
+        <Modal.Title>Удалить канал</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
-          <FormGroup className="form-group mb-2">
-            <FormControl
-              ref={inputEl}
-              name="name"
-              id="name"
-              required
-              onChange={formik.handleChange}
-              value={formik.values.name}
-              onBlur={formik.handleBlur}
-            />
-            <FormLabel visuallyHidden htmlFor="name">Имя канала</FormLabel>
-          </FormGroup>
-          <div className="d-flex justify-content-end">
-            <button type="button" className="me-2 btn btn-secondary" onClick={onHide}>
-              Отменить
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Отправить
-            </button>
-          </div>
-        </form>
+        <p className="lead">Уверены?</p>
+        <div className="d-flex justify-content-end">
+          <button
+            type="button"
+            className="me-2 btn btn-secondary"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Отменить
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={onSubmit}
+            disabled={loading}
+          >
+            Удалить
+          </button>
+        </div>
       </Modal.Body>
-    </Modal>
+    </>
   );
 };
 
-export default Add;
-// END
+export default Remove;

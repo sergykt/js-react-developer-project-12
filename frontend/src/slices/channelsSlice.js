@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import routes from "../routes.js";
@@ -40,6 +40,19 @@ const channelsSlice = createSlice({
     changeChannel(state, { payload }) {
       state.currentChannelId = payload;
     },
+    renameChannel(state, { payload }) {
+      const { id } = payload;
+      const channelIndex = state.channels.findIndex((item) => item.id === id);
+      state.channels[channelIndex] = payload;
+    },
+    removeChannel(state, { payload }) {
+      const { id } = payload;
+      const channelIndex = state.channels.findIndex((item) => item.id === id);
+      state.channels.splice(channelIndex, 1);
+      if (state.currentChannelId === payload.id) {
+        state.currentChannelId = state.channels[0].id;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -50,6 +63,11 @@ const channelsSlice = createSlice({
   },
 });
 
-export const { actions } = channelsSlice;
+export const {
+  addChannel, 
+  changeChannel, 
+  renameChannel, 
+  removeChannel, 
+} = channelsSlice.actions;
 
 export default channelsSlice.reducer;

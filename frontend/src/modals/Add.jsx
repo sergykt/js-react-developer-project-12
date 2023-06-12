@@ -3,11 +3,28 @@ import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { Modal, FormGroup, FormControl, FormLabel } from "react-bootstrap";
 import * as yup from "yup";
-import { socket } from "../socket";
+import { useApi } from "../hooks/index.jsx";
+import { getChannelsNames } from "../slices/selectors.js";
+import { toast } from "react-toastify";
 
-const Add = ({ onHide }) => {
-  const { channels } = useSelector((state) => state.channelsReducer);
-  const [submitFailed, setSubmitFailed] = useState({ state: false, message: ''});
+const getValidationSchema = (channels) =>
+  yup.object().shape({
+    name: yup
+      .string()
+      .trim()
+      .required("Обязательное поле")
+      .min(3, "От 3 до 20 символов")
+      .max(20, "От 3 до 20 символов")
+      .notOneOf(channels, "Должно быть уникальным"),
+  });
+
+const Add = ({ handleClose }) => {
+  const api = useApi();
+  const channels = useSelector(getChannelsNames);
+  const [submitFailed, setSubmitFailed] = useState({
+    state: false,
+    message: "",
+  });
 
   const inputEl = useRef();
 
@@ -15,34 +32,32 @@ const Add = ({ onHide }) => {
     inputEl.current.focus();
   }, []);
 
-  const schema = yup.object().shape({
-    name: yup.string().trim().required('Обязательное поле')
-      .min(3, 'От 3 до 20 символов').max(20, 'От 3 до 20 символов'),
-  });
+  const schema = getValidationSchema(channels);
 
   const formik = useFormik({
     initialValues: {
-      name: '',
+      name: "",
     },
-    onSubmit: (values) => {
+    onSubmit: async (values, { setSubmitting }) => {
+      const { name } = values;
+      setSubmitFailed({ state: false, message: "" });
       try {
         schema.validateSync(values);
-        const isRepeat = channels.find((item) => item.name === values.name);
-        if (isRepeat) {
-          throw new Error('Должно быть уникальным');
-        }
-        socket.emit('newChannel', { name: values.name }, (response) => {
-         console.log(response.status);
-        });
-        onHide();
+        await api.addChannel({ name });
+        toast.success("Канал создан");
+        handleClose();
       } catch (err) {
-        setSubmitFailed({ state: true, message: err.message });
+        setSubmitting(false);
+        inputEl.current.select();
+        if (err.name === "ValidationError") {
+          setSubmitFailed({ state: true, message: err.message });
+        }
       }
     },
   });
 
   return (
-    <Modal show onHide={onHide} centered>
+    <>
       <Modal.Header closeButton>
         <Modal.Title>Добавить канал</Modal.Title>
       </Modal.Header>
@@ -57,23 +72,34 @@ const Add = ({ onHide }) => {
               value={formik.values.name}
               onBlur={formik.handleBlur}
               isInvalid={submitFailed.state}
+              disabled={formik.isSubmitting}
             />
-            <FormLabel visuallyHidden htmlFor="name">Имя канала</FormLabel>
+            <FormLabel visuallyHidden htmlFor="name">
+              Имя канала
+            </FormLabel>
             <FormControl.Feedback type="invalid">
               {submitFailed.message}
             </FormControl.Feedback>
           </FormGroup>
           <div className="d-flex justify-content-end">
-            <button type="button" className="me-2 btn btn-secondary" onClick={onHide}>
+            <button
+              type="button"
+              className="me-2 btn btn-secondary"
+              onClick={handleClose}
+            >
               Отменить
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={formik.isSubmitting}
+            >
               Отправить
             </button>
           </div>
         </form>
       </Modal.Body>
-    </Modal>
+    </>
   );
 };
 

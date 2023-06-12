@@ -3,56 +3,58 @@ import { useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { Form } from "react-bootstrap";
 import cn from 'classnames';
-import { socket } from "../socket";
+import { useApi } from "../hooks";
+import { getChannelMessages, getChannelName, getCurrentChannelId, getUserName } from "../slices/selectors";
 
 const ChatBody = () => {
-  const inputEl = useRef();
+  const api = useApi();
+
+  const inputEl = useRef(null);
+  const chatRef = useRef(null);
 
   useEffect(() => {
     inputEl.current.focus();
+    chatRef.current.scrollTop = chatRef.current.scrollHeight;
   });
 
-  const { channels, currentChannelId } = useSelector((state) => state.channelsReducer);
-  const { messages } = useSelector((state) => state.messagesReducer);
-
-  const currentChannel = channels.find(({ id }) => id === currentChannelId);
-  const channelMessages = messages.filter(({ channelId }) => channelId === currentChannelId);
-
-  const userId = JSON.parse(localStorage.getItem('userId'));
-  const { username } = userId;
+  const currentChannelId = useSelector(getCurrentChannelId);
+  const currentChannel = useSelector(getChannelName);
+  const messages = useSelector(getChannelMessages);
+  const username = getUserName();
 
   const formik = useFormik({
     initialValues: {
       body: '',
     },
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
       const newMessage = {
-        body: values.body,
+        body: values.body.trim(),
         channelId: currentChannelId,
         username,
       };
-      socket.emit('newMessage', newMessage, (response) => {
-        console.log(response.status);
-      });
-    
-      resetForm();
+      try {
+        await api.addMessage(newMessage);
+        resetForm();
+      } catch(err) {
+        setSubmitting(false);
+      }
     },
   });
 
   const formGroupClass = cn('input-group', {
-    'has-validation': formik.values.body === '',
+    'has-validation': formik.values.body.trim() === '',
   });
 
   return (
-    <div className="d-flex flex-column h-100">
+    <div className="d-flex flex-column h-100" >
       <div className="bg-light mb-4 p-3 shadow-sm small">
         <p className="m-0">
-          <b># {currentChannel && currentChannel.name}</b>
+          <b># {currentChannel && currentChannel}</b>
         </p>
-        <span className="text-muted">{channelMessages.length} сообщение</span>
+        <span className="text-muted">{messages.length} сообщение</span>
       </div>
-      <div id="messages-box" className="chat-messages overflow-auto px-5">
-        {channelMessages.map(({ username, body, id }) => (
+      <div id="messages-box" className="chat-messages overflow-auto px-5" ref={chatRef}>
+        {messages.map(({ username, body, id }) => (
           <div className="text-break mb-2" key={id}>
             <b>{username}</b>: {body}
           </div>
@@ -73,14 +75,11 @@ const ChatBody = () => {
               value={formik.values.body}
               onChange={formik.handleChange}
               className="border-0 p-0 ps-2"
-              //isInvalid={!isConnected}
+              disabled={formik.isSubmitting}
             />
-            <Form.Control.Feedback tooltip type="invalid">
-              Ошибка соединения
-            </Form.Control.Feedback>
             <button
               type="submit"
-              disabled={formik.values.body === ''}
+              disabled={formik.values.body.trim() === '' || formik.isSubmitting}
               className="btn btn-group-vertical border-0"
             >
               <svg

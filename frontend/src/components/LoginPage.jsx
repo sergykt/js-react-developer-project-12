@@ -10,16 +10,15 @@ import {
 } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import useAuth from "../hooks/index.jsx";
+import { useAuth } from "../hooks/index.jsx";
 import routes from "../routes.js";
 import * as yup from "yup";
 import axios from "axios";
 
 const generateOnSubmit =
-  (setAuthFailed, auth, navigate, location, schema) => async (values) => {
+  (setAuthFailed, auth, navigate, location) => async (values) => {
     setAuthFailed(false);
     try {
-      await schema.validate(values);
       const responce = await axios.post(routes.loginPath(), values);
       localStorage.setItem("userId", JSON.stringify(responce.data));
       auth.logIn();
@@ -43,7 +42,7 @@ const LoginPage = () => {
 
   const schema = yup.object().shape({
     username: yup.string().trim().required(),
-    password: yup.string().required(),
+    password: yup.string().trim().required().min(6),
   });
 
   const onSubmit = generateOnSubmit(
@@ -51,7 +50,7 @@ const LoginPage = () => {
     auth,
     navigate,
     location,
-    schema
+    schema,
   );
 
   const formik = useFormik({
