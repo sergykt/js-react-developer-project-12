@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginPage from "./LoginPage.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
 import ChatPage from "./ChatPage.jsx";
+import SignUpPage from "./SignUpPage.jsx";
 import NavigationBar from "./NavigationBar.jsx";
 
 import { AuthContext, ApiContext } from "../contexts/index.jsx";
@@ -190,6 +191,7 @@ const App = () => {
                 }
               />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </div>

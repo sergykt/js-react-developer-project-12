@@ -8,19 +8,18 @@ import {
   Card,
   FloatingLabel,
 } from "react-bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { useAuth } from "../hooks/index.jsx";
 import routes from "../routes.js";
-import * as yup from "yup";
 import axios from "axios";
 
 const generateOnSubmit =
-  (setAuthFailed, auth, navigate, location) => async (values) => {
+  (setAuthFailed, auth, navigate) => async (values) => {
     setAuthFailed(false);
     try {
-      const responce = await axios.post(routes.loginPath(), values);
-      localStorage.setItem("userId", JSON.stringify(responce.data));
+      const response = await axios.post(routes.loginPath(), values);
+      localStorage.setItem("userId", JSON.stringify(response.data));
       auth.logIn();
       const from = { pathname: "/" };
       navigate(from);
@@ -38,25 +37,13 @@ const LoginPage = () => {
   const [authFailed, setAuthFailed] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const schema = yup.object().shape({
-    username: yup.string().trim().required(),
-    password: yup.string().trim().required().min(6),
-  });
-
-  const onSubmit = generateOnSubmit(
-    setAuthFailed,
-    auth,
-    navigate,
-    location,
-    schema,
-  );
+  const onSubmit = generateOnSubmit(setAuthFailed, auth, navigate);
 
   const formik = useFormik({
     initialValues: {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     },
     onSubmit,
   });
@@ -97,6 +84,7 @@ const LoginPage = () => {
                       required
                       placeholder="Ваш ник"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       isInvalid={authFailed}
                       value={formik.values.username}
                     />
@@ -115,6 +103,7 @@ const LoginPage = () => {
                       required
                       placeholder="Пароль"
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       isInvalid={authFailed}
                       value={formik.values.password}
                     />
@@ -132,6 +121,11 @@ const LoginPage = () => {
                 </Button>
               </Form>
             </Card.Body>
+            <Card.Footer className="p-4">
+              <div className="text-center">
+                <span>Нет аккаунта?</span> <a href="/signup">Регистрация</a>
+              </div>
+            </Card.Footer>
           </Card>
         </Col>
       </Row>
