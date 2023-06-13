@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { Modal, FormGroup, FormControl, FormLabel } from "react-bootstrap";
 import * as yup from "yup";
 import { useApi } from "../hooks/index.jsx";
+import { useTranslation } from "react-i18next";
 import { getChannelsNames } from "../slices/selectors.js";
 import { toast } from "react-toastify";
 
@@ -12,14 +13,15 @@ const getValidationSchema = (channels) =>
     name: yup
       .string()
       .trim()
-      .required("Обязательное поле")
-      .min(3, "От 3 до 20 символов")
-      .max(20, "От 3 до 20 символов")
-      .notOneOf(channels, "Должно быть уникальным"),
+      .required('modals.required')
+      .min(3, 'modals.min')
+      .max(20, 'modals.max')
+      .notOneOf(channels, 'modals.uniq'),
   });
 
 const Add = ({ handleClose }) => {
   const api = useApi();
+  const { t } = useTranslation();
   const channels = useSelector(getChannelsNames);
   const [submitFailed, setSubmitFailed] = useState({
     state: false,
@@ -44,7 +46,7 @@ const Add = ({ handleClose }) => {
       try {
         schema.validateSync(values);
         await api.addChannel({ name });
-        toast.success("Канал создан");
+        toast.success(t('channels.created'));
         handleClose();
       } catch (err) {
         setSubmitting(false);
@@ -59,7 +61,7 @@ const Add = ({ handleClose }) => {
   return (
     <>
       <Modal.Header closeButton>
-        <Modal.Title>Добавить канал</Modal.Title>
+        <Modal.Title>{t('modals.add')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={formik.handleSubmit}>
@@ -75,10 +77,10 @@ const Add = ({ handleClose }) => {
               disabled={formik.isSubmitting}
             />
             <FormLabel visuallyHidden htmlFor="name">
-              Имя канала
+              {t('modals.channel-name')}
             </FormLabel>
             <FormControl.Feedback type="invalid">
-              {submitFailed.message}
+              {t(submitFailed.message)}
             </FormControl.Feedback>
           </FormGroup>
           <div className="d-flex justify-content-end">
@@ -87,14 +89,14 @@ const Add = ({ handleClose }) => {
               className="me-2 btn btn-secondary"
               onClick={handleClose}
             >
-              Отменить
+              {t('modals.cancel')}
             </button>
             <button
               type="submit"
               className="btn btn-primary"
               disabled={formik.isSubmitting}
             >
-              Отправить
+              {t('modals.submit')}
             </button>
           </div>
         </form>

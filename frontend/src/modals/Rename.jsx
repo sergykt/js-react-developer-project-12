@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { Modal, FormGroup, FormControl, FormLabel } from "react-bootstrap";
 import * as yup from "yup";
 import { useApi } from "../hooks/index.jsx";
+import { useTranslation } from "react-i18next";
 import { getChannelsNames, getChannelById, getExtraId } from "../slices/selectors.js";
 import { toast } from "react-toastify";
 
@@ -12,15 +13,15 @@ const getValidationSchema = (channels) =>
     name: yup
       .string()
       .trim()
-      .required("Обязательное поле")
-      .min(3, "От 3 до 20 символов")
-      .max(20, "От 3 до 20 символов")
-      .notOneOf(channels, "Должно быть уникальным"),
+      .required('modals.required')
+      .min(3, 'modals.min')
+      .max(20, 'modals.max')
+      .notOneOf(channels, 'modals.uniq'),
   });
 
 const Rename = ({ handleClose }) => {
   const api = useApi();
-
+  const { t } = useTranslation();
   const channelId = useSelector(getExtraId);
   const channel = useSelector(getChannelById(channelId));
   const channels = useSelector(getChannelsNames);
@@ -48,7 +49,7 @@ const Rename = ({ handleClose }) => {
       try {
         schema.validateSync(values);
         await api.renameChannel({ name, id: channelId });
-        toast.success("Канал переименован");
+        toast.success(t('channels.renamed'));
         handleClose();
       } catch (err) {
         setSubmitting(false);
@@ -63,7 +64,7 @@ const Rename = ({ handleClose }) => {
   return (
     <>
       <Modal.Header closeButton>
-        <Modal.Title>Переименовать канал</Modal.Title>
+        <Modal.Title>{t('modals.rename')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={formik.handleSubmit}>
@@ -79,10 +80,10 @@ const Rename = ({ handleClose }) => {
               disabled={formik.isSubmitting}
             />
             <FormLabel visuallyHidden htmlFor="name">
-              Имя канала
+              {t('modals.channel-name')}
             </FormLabel>
             <FormControl.Feedback type="invalid">
-              {submitFailed.message}
+              {t(submitFailed.message)}
             </FormControl.Feedback>
           </FormGroup>
           <div className="d-flex justify-content-end">
@@ -91,14 +92,14 @@ const Rename = ({ handleClose }) => {
               className="me-2 btn btn-secondary"
               onClick={handleClose}
             >
-              Отменить
+              {t('modals.cancel')}
             </button>
             <button
               type="submit"
               className="btn btn-primary"
               disabled={formik.isSubmitting}
             >
-              Отправить
+              {t('modals.submit')}
             </button>
           </div>
         </form>

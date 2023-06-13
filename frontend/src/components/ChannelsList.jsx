@@ -1,17 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { actions } from "../slices/index.js";
 import { getChannels } from "../slices/selectors.js";
 import Modal from "../modals/Modal.jsx";
 import ChannelButton from "./ChannelButton.jsx";
 
 const ChannelsList = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const channels = useSelector(getChannels);
 
   return (
     <>
       <div className="d-flex mt-1 justify-content-between mb-2 ps-4 pe-2 p-4">
-        <b>Каналы</b>
+        <b>{t('channels.channels')}</b>
         <button
           type="button"
           className="p-0 text-primary btn btn-group-vertical"

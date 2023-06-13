@@ -3,9 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import cn from "classnames";
 import { getCurrentChannelId } from "../slices/selectors";
 import { actions } from "../slices";
+import { useTranslation } from "react-i18next";
 
 const ChannelButton = ({ id, name, removable }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const currentChannelId = useSelector(getCurrentChannelId);
   const isSelected = id === currentChannelId;
 
@@ -31,8 +34,8 @@ const ChannelButton = ({ id, name, removable }) => {
           variant={toggleVariant}
         />
         <Dropdown.Menu>
-          <Dropdown.Item href="#" onClick={() => dispatch(actions.setModalRemove(id))}>Удалить</Dropdown.Item>
-          <Dropdown.Item href="#" onClick={() => dispatch(actions.setModalRename(id))}>Переименовать</Dropdown.Item>
+          <Dropdown.Item href="#" onClick={() => dispatch(actions.setModalRemove(id))}>{t('channels.remove')}</Dropdown.Item>
+          <Dropdown.Item href="#" onClick={() => dispatch(actions.setModalRename(id))}>{t('channels.rename')}</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     );

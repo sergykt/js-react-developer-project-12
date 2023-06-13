@@ -9,6 +9,7 @@ import {
 import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
 
 import LoginPage from "./LoginPage.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
@@ -41,18 +42,19 @@ const AuthProvider = ({ children }) => {
 };
 
 const ApiProvider = ({ children }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
     const timerId = setInterval(() => {
       if (!isConnected) {
-        toast.error("Нет соединения");
+        toast.error(t('connection-error'));
       }
     }, 10000);
 
     return () => clearInterval(timerId);
-  }, [isConnected]);
+  }, [isConnected]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handleConnect = () => {
@@ -60,7 +62,6 @@ const ApiProvider = ({ children }) => {
     };
 
     const handleDisconnect = () => {
-      console.log("Соединение потеряно");
       setIsConnected(false);
     };
 
