@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
+import { toast } from "react-toastify";
 import { useAuth } from "../hooks/index.jsx";
 import routes from "../routes.js";
 import * as yup from "yup";
@@ -20,6 +21,11 @@ const SignUpPage = () => {
   const auth = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const inputEl = useRef(null);
+  useEffect(() => {
+    inputEl.current.focus();
+  }, []);
 
   const schema = yup.object().shape({
     username: yup
@@ -46,31 +52,28 @@ const SignUpPage = () => {
       confirmPassword: "",
     },
     validationSchema: schema,
-    onSubmit: async ({ username, password }, { setSubmitting, setStatus }) => {
+    onSubmit: async ({ username, password }, { setStatus }) => {
       try {
         const data = { username, password };
         const response = await axios.post(routes.createUserPath(), data);
         localStorage.setItem("userId", JSON.stringify(response.data));
-        auth.logIn();
+        auth.logIn(response.data.username);
         const from = { pathname: "/" };
         navigate(from);
       } catch (err) {
-        setSubmitting(false);
-        if (err.isAxiosError && err.response.status === 409) {
+        if (err.isAxiosError && err.response?.status === 409) {
+          inputEl.current.select();
           setStatus('sign-up.name-exist');
-          return;
+        } else if (err.message === 'Network Error') {
+          toast.error(t('network-error'));
+        } else {
+          throw err;
         }
-        throw err;
       }
     },
   });
 
   const { errors, touched, status } = formik;
-
-  const inputEl = useRef();
-  useEffect(() => {
-    inputEl.current.focus();
-  }, []);
 
   return (
     <Container fluid className="h-100">
@@ -108,7 +111,6 @@ const SignUpPage = () => {
                         (errors.username && touched.username) || !!status
                       }
                       value={formik.values.username}
-                      disabled={formik.isSubmitting}
                     />
                     <Form.Control.Feedback tooltip type="invalid">
                       {t(errors.username)}
@@ -133,7 +135,6 @@ const SignUpPage = () => {
                         (errors.password && touched.password) || !!status
                       }
                       value={formik.values.password}
-                      disabled={formik.isSubmitting}
                     />
                     <Form.Control.Feedback tooltip type="invalid">
                       {t(errors.password)}
@@ -159,7 +160,6 @@ const SignUpPage = () => {
                         !!status
                       }
                       value={formik.values.confirmPassword}
-                      disabled={formik.isSubmitting}
                     />
                     <Form.Control.Feedback tooltip type="invalid">
                       {t(errors.confirmPassword) || t(status)}
@@ -170,7 +170,6 @@ const SignUpPage = () => {
                   type="submit"
                   variant="outline-primary"
                   className="w-100"
-                  disabled={formik.isSubmitting}
                 >
                   {t('sign-up.submit')}
                 </Button>

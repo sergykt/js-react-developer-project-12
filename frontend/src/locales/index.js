@@ -1,7 +1,7 @@
 const resources = {
   ru: {
     translation: {
-      "connection-error": "Нет соединения",
+      "network-error": "Ошибка соединения",
       "nav": {
         "Hexlet-Chat": "Hexlet Chat",
         "quit": "Выйти",

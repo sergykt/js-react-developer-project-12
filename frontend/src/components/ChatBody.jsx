@@ -4,11 +4,12 @@ import { useFormik } from "formik";
 import { Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import cn from 'classnames';
-import { useApi } from "../hooks";
-import { getChannelMessages, getChannelName, getCurrentChannelId, getUserName } from "../slices/selectors";
+import { useApi, useAuth } from "../hooks";
+import { getChannelMessages, getChannelName, getCurrentChannelId } from "../slices/selectors";
 
 const ChatBody = () => {
   const api = useApi();
+  const auth = useAuth();
   const { t } = useTranslation();
 
   const inputEl = useRef(null);
@@ -22,7 +23,7 @@ const ChatBody = () => {
   const currentChannelId = useSelector(getCurrentChannelId);
   const currentChannel = useSelector(getChannelName);
   const messages = useSelector(getChannelMessages);
-  const username = getUserName();
+  const username = auth.username;
 
   const formik = useFormik({
     initialValues: {

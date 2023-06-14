@@ -30,11 +30,6 @@ export const getChannelMessages = createSelector(
   (messages, currentChannelId) => messages.filter(({ channelId }) => channelId === currentChannelId),
 );
 
-export const getUserName = () => {
-  const userId = JSON.parse(localStorage.getItem('userId')) || { username: '' };
-  return userId.username;
-};
-
 export const getIsModalOpened = (state) => state.modalsReducer.isOpened;
 
 export const getModalType = (state) => state.modalsReducer.type;

@@ -7,9 +7,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useTranslation } from "react-i18next";
 
 import LoginPage from "./LoginPage.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
@@ -25,46 +24,34 @@ import { actions } from "../slices/index.js";
 
 const AuthProvider = ({ children }) => {
   const userId = JSON.parse(localStorage.getItem("userId"));
-  const logState = userId && userId.token;
-  const [loggedIn, setLoggedIn] = useState(logState);
+  const name = userId ? userId.username : '';
+  const loginState = userId && userId.token;
 
-  const logIn = () => setLoggedIn(true);
+  const [loggedIn, setLoggedIn] = useState(loginState);
+  const [username, setUserName] = useState(name);
+
+  const logIn = (name) => {
+    setLoggedIn(true);
+    setUserName(name);
+  };
+
   const logOut = () => {
     localStorage.removeItem("userId");
     setLoggedIn(false);
+    setUserName('');
   };
 
   return (
-    <AuthContext.Provider value={{ loggedIn, logIn, logOut }}>
+    <AuthContext.Provider value={{ loggedIn, username, logIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 const ApiProvider = ({ children }) => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
-    const timerId = setInterval(() => {
-      if (!isConnected) {
-        toast.error(t('connection-error'));
-      }
-    }, 10000);
-
-    return () => clearInterval(timerId);
-  }, [isConnected]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const handleConnect = () => {
-      setIsConnected(true);
-    };
-
-    const handleDisconnect = () => {
-      setIsConnected(false);
-    };
-
     const handleNewMessage = (payload) => {
       dispatch(actions.addMessage(payload));
     };
@@ -82,16 +69,12 @@ const ApiProvider = ({ children }) => {
       dispatch(actions.removeChannel(payload));
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
     socket.on("newMessage", handleNewMessage);
     socket.on("newChannel", handleNewChannel);
     socket.on("renameChannel", handleRenameChannel);
     socket.on("removeChannel", handleRemoveChannel);
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
       socket.off("newMessage", handleNewMessage);
       socket.off("newChannel", handleNewChannel);
       socket.off("renameChannel", handleRenameChannel);
@@ -106,7 +89,7 @@ const ApiProvider = ({ children }) => {
           if (response.status === "ok") {
             resolve();
           } else {
-            reject(response.error);
+            reject();
           }
         });
       }, 200);
@@ -121,7 +104,7 @@ const ApiProvider = ({ children }) => {
           if (response.status === "ok") {
             resolve();
           } else {
-            reject(response.error);
+            reject();
           }
         });
       }, 200);
@@ -136,7 +119,7 @@ const ApiProvider = ({ children }) => {
           if (response.status === "ok") {
             resolve();
           } else {
-            reject(response.error);
+            reject();
           }
         });
       }, 200);
@@ -151,7 +134,7 @@ const ApiProvider = ({ children }) => {
           if (response.status === "ok") {
             resolve();
           } else {
-            reject(response.error);
+            reject();
           }
         });
       }, 40);

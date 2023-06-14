@@ -12,26 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { useAuth } from "../hooks/index.jsx";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 import routes from "../routes.js";
 import axios from "axios";
-
-const generateOnSubmit = (setAuthFailed, auth, navigate) => async (values) => {
-  setAuthFailed(false);
-  try {
-    const response = await axios.post(routes.loginPath(), values);
-    localStorage.setItem("userId", JSON.stringify(response.data));
-    auth.logIn();
-    const from = { pathname: "/" };
-    navigate(from);
-  } catch (err) {
-    setAuthFailed(false);
-    if (err.isAxiosError && err.response.status === 401) {
-      setAuthFailed(true);
-      return;
-    }
-    throw err;
-  }
-};
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -39,20 +22,36 @@ const LoginPage = () => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  const onSubmit = generateOnSubmit(setAuthFailed, auth, navigate);
+  const inputEl = useRef(null);
+  useEffect(() => {
+    inputEl.current.focus();
+  }, []);
 
   const formik = useFormik({
     initialValues: {
       username: "",
       password: "",
     },
-    onSubmit,
+    onSubmit: async (values) => {
+      setAuthFailed(false);
+      try {
+        const response = await axios.post(routes.loginPath(), values);
+        localStorage.setItem("userId", JSON.stringify(response.data));
+        auth.logIn(response.data.username);
+        const from = { pathname: "/" };
+        navigate(from);
+      } catch (err) {
+        if (err.isAxiosError && err.response?.status === 401) {
+          inputEl.current.select();
+          setAuthFailed(true);
+        } else if (err.message === 'Network Error') {
+          toast.error(t('network-error'));
+        } else {
+          throw err;
+        }
+      }
+    },
   });
-
-  const inputEl = useRef();
-  useEffect(() => {
-    inputEl.current.focus();
-  }, []);
 
   return (
     <Container fluid className="h-100">
