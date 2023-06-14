@@ -4,8 +4,13 @@ import { useFormik } from "formik";
 import { Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import cn from 'classnames';
+import leoProfanity from 'leo-profanity';
+
 import { useApi, useAuth } from "../hooks";
 import { getChannelMessages, getChannelName, getCurrentChannelId } from "../slices/selectors";
+
+leoProfanity.add(leoProfanity.getDictionary('ru'));
+leoProfanity.add(leoProfanity.getDictionary('en'));
 
 const ChatBody = () => {
   const api = useApi();
@@ -59,7 +64,7 @@ const ChatBody = () => {
       <div id="messages-box" className="chat-messages overflow-auto px-5" ref={chatRef}>
         {messages.map(({ username, body, id }) => (
           <div className="text-break mb-2" key={id}>
-            <b>{username}</b>: {body}
+            <b>{leoProfanity.clean(username)}</b>: {leoProfanity.clean(body)}
           </div>
         ))}
       </div>

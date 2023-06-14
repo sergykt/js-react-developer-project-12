@@ -1,9 +1,14 @@
 import { Dropdown, ButtonGroup } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import cn from "classnames";
+import { useTranslation } from "react-i18next";
+import leoProfanity from 'leo-profanity';
+
 import { getCurrentChannelId } from "../slices/selectors";
 import { actions } from "../slices";
-import { useTranslation } from "react-i18next";
+
+leoProfanity.add(leoProfanity.getDictionary('ru'));
+leoProfanity.add(leoProfanity.getDictionary('en'));
 
 const ChannelButton = ({ id, name, removable }) => {
   const dispatch = useDispatch();
@@ -26,7 +31,7 @@ const ChannelButton = ({ id, name, removable }) => {
           onClick={() => dispatch(actions.changeChannel(id))}
         >
           <span className="me-1">#</span>
-          {name}
+          {leoProfanity.clean(name)}
         </button>
         <Dropdown.Toggle
           className="flex-grow-0"
