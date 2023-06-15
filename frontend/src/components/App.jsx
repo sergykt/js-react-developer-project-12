@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { socket } from '../socket';
+import socket from '../socket';
 
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
@@ -89,7 +89,7 @@ const ApiProvider = ({ children }) => {
       socket.off('renameChannel', handleRenameChannel);
       socket.off('removeChannel', handleRemoveChannel);
     };
-  }, []);
+  }, [dispatch]);
 
   const addChannel = (data) => new Promise((resolve, reject) => {
     setTimeout(() => {

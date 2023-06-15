@@ -49,7 +49,7 @@ const ChatPage = () => {
     };
 
     requestData();
-  }, []);
+  }, [dispatch, auth, rollbar, t]);
 
   return (
     <Container className="rounded shadow h-100 my-4 overflow-hidden">
