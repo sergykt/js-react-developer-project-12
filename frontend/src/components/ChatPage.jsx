@@ -2,11 +2,11 @@ import axios from 'axios';
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Row, Col, Container } from "react-bootstrap";
+import { useRollbar } from '@rollbar/react';
 import { toast } from "react-toastify";
 import { actions } from '../slices/index.js';
 import ChannelsList from "./ChannelsList.jsx";
 import ChatBody from "./ChatBody.jsx";
-import { useAuth } from '../hooks/index.jsx';
 import { useTranslation } from 'react-i18next';
 import routes from '../routes.js';
 
@@ -22,8 +22,8 @@ const getAuthHeader = () => {
 
 const ChatPage = () => {
   const dispatch = useDispatch();
-  const auth = useAuth();
   const { t } = useTranslation();
+  const rollbar = useRollbar();
 
   useEffect(() => {
     const requestData = async () => {
@@ -35,13 +35,13 @@ const ChatPage = () => {
     
         dispatch(actions.setInitialState(response.data));
       } catch(err) {
-        if (err.isAxiosError && err.response?.status === 401) {
-          auth.logOut();
-        } else if (err.message === 'Network Error') {
+        rollbar.error(err);
+        if (err.message === 'Network Error') {
           toast.error(t('network-error'));
-        } else {
-          throw err;
-        }
+          return;
+        } 
+        
+        throw err;
       }
     };
 

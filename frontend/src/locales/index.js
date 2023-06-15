@@ -12,14 +12,14 @@ const resources = {
         "password": "Пароль",
         "no-account": "Нет аккаунта?",
         "registration": "Регистрация",
-        "invalid-input": "Неверные имя или пароль",
+        "invalid-input": "Неверные имя пользователя или пароль",
       },
       "channels": {
         "channels": "Каналы",
         "rename": "Переименовать",
         "remove": "Удалить",
         "created": "Канал создан",
-        "removed": "Канал удален",
+        "removed": "Канал удалён",
         "renamed": "Канал переименован",
       },
       "chat": {

@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
+import { useRollbar } from '@rollbar/react';
 import { toast } from "react-toastify";
 import { useAuth } from "../hooks/index.jsx";
 import routes from "../routes.js";
@@ -21,6 +22,7 @@ const SignUpPage = () => {
   const auth = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const rollbar = useRollbar();
 
   const inputEl = useRef(null);
   useEffect(() => {
@@ -61,6 +63,7 @@ const SignUpPage = () => {
         const from = { pathname: "/" };
         navigate(from);
       } catch (err) {
+        rollbar.error(err);
         if (err.isAxiosError && err.response?.status === 409) {
           inputEl.current.select();
           setStatus('sign-up.name-exist');

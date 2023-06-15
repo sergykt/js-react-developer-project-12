@@ -6,6 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { Provider, ErrorBoundary } from "@rollbar/react";
 import { useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,9 +23,14 @@ import { AuthContext, ApiContext } from "../contexts/index.jsx";
 import { useAuth } from "../hooks/index.jsx";
 import { actions } from "../slices/index.js";
 
+const rollbarConfig = {
+  accessToken: "44a12c82641f4a77bf31ab62da668d9f",
+  environment: "testenv",
+};
+
 const AuthProvider = ({ children }) => {
   const userId = JSON.parse(localStorage.getItem("userId"));
-  const name = userId ? userId.username : '';
+  const name = userId ? userId.username : "";
   const loginState = userId && userId.token;
 
   const [loggedIn, setLoggedIn] = useState(loginState);
@@ -38,7 +44,7 @@ const AuthProvider = ({ children }) => {
   const logOut = () => {
     localStorage.removeItem("userId");
     setLoggedIn(false);
-    setUserName('');
+    setUserName("");
   };
 
   return (
@@ -160,29 +166,33 @@ const PrivateRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <ApiProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <div className="d-flex flex-column h-100">
-            <NavigationBar />
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <ChatPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </div>
-        </BrowserRouter>
-      </AuthProvider>
-      <ToastContainer />
-    </ApiProvider>
+    <Provider config={rollbarConfig}>
+      <ErrorBoundary>
+        <ApiProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <div className="d-flex flex-column h-100">
+                <NavigationBar />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <PrivateRoute>
+                        <ChatPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignUpPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </div>
+            </BrowserRouter>
+          </AuthProvider>
+          <ToastContainer />
+        </ApiProvider>
+      </ErrorBoundary>
+    </Provider>
   );
 };
 

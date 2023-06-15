@@ -9,6 +9,7 @@ import {
   FloatingLabel,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useRollbar } from '@rollbar/react';
 import { useFormik } from "formik";
 import { useAuth } from "../hooks/index.jsx";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,7 @@ const LoginPage = () => {
   const [authFailed, setAuthFailed] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
+  const rollbar = useRollbar();
 
   const inputEl = useRef(null);
   useEffect(() => {
@@ -41,6 +43,7 @@ const LoginPage = () => {
         const from = { pathname: "/" };
         navigate(from);
       } catch (err) {
+        rollbar.error(err);
         if (err.isAxiosError && err.response?.status === 401) {
           inputEl.current.select();
           setAuthFailed(true);
