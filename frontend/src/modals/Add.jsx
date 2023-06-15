@@ -1,23 +1,24 @@
-import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { useFormik } from "formik";
-import { Modal, FormGroup, FormControl, FormLabel } from "react-bootstrap";
-import * as yup from "yup";
-import { useApi } from "../hooks/index.jsx";
-import { useTranslation } from "react-i18next";
-import { getChannelsNames } from "../slices/selectors.js";
-import { toast } from "react-toastify";
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useFormik } from 'formik';
+import {
+  Modal, FormGroup, FormControl, FormLabel,
+} from 'react-bootstrap';
+import * as yup from 'yup';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import { useApi } from '../hooks/index.jsx';
+import { getChannelsNames } from '../slices/selectors.js';
 
-const getValidationSchema = (channels) =>
-  yup.object().shape({
-    name: yup
-      .string()
-      .trim()
-      .required('modals.required')
-      .min(3, 'modals.min')
-      .max(20, 'modals.max')
-      .notOneOf(channels, 'modals.uniq'),
-  });
+const getValidationSchema = (channels) => yup.object().shape({
+  name: yup
+    .string()
+    .trim()
+    .required('modals.required')
+    .min(3, 'modals.min')
+    .max(20, 'modals.max')
+    .notOneOf(channels, 'modals.uniq'),
+});
 
 const Add = ({ handleClose }) => {
   const api = useApi();
@@ -25,7 +26,7 @@ const Add = ({ handleClose }) => {
   const channels = useSelector(getChannelsNames);
   const [submitFailed, setSubmitFailed] = useState({
     state: false,
-    message: "",
+    message: '',
   });
 
   const inputEl = useRef();
@@ -38,11 +39,11 @@ const Add = ({ handleClose }) => {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
+      name: '',
     },
     onSubmit: async (values, { setSubmitting }) => {
       const { name } = values;
-      setSubmitFailed({ state: false, message: "" });
+      setSubmitFailed({ state: false, message: '' });
       try {
         schema.validateSync(values);
         await api.addChannel({ name });
@@ -51,7 +52,7 @@ const Add = ({ handleClose }) => {
       } catch (err) {
         setSubmitting(false);
         inputEl.current.select();
-        if (err.name === "ValidationError") {
+        if (err.name === 'ValidationError') {
           setSubmitFailed({ state: true, message: err.message });
         }
       }

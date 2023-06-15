@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Form,
@@ -7,15 +7,15 @@ import {
   Container,
   Card,
   FloatingLabel,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useRollbar } from '@rollbar/react';
-import { useFormik } from "formik";
-import { useAuth } from "../hooks/index.jsx";
-import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
-import routes from "../routes.js";
-import axios from "axios";
+import { useFormik } from 'formik';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import routes from '../routes.js';
+import { useAuth } from '../hooks/index.jsx';
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -31,16 +31,16 @@ const LoginPage = () => {
 
   const formik = useFormik({
     initialValues: {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
     },
     onSubmit: async (values) => {
       setAuthFailed(false);
       try {
         const response = await axios.post(routes.loginPath(), values);
-        localStorage.setItem("userId", JSON.stringify(response.data));
+        localStorage.setItem('userId', JSON.stringify(response.data));
         auth.logIn(response.data.username);
-        const from = { pathname: "/" };
+        const from = { pathname: '/' };
         navigate(from);
       } catch (err) {
         rollbar.error(err);
@@ -66,18 +66,18 @@ const LoginPage = () => {
                 <img
                   src="/img/avatar.jpg"
                   className="rounded-circle"
-                  alt={t("login.enter")}
+                  alt={t('login.enter')}
                 />
               </div>
               <Form
                 onSubmit={formik.handleSubmit}
                 className="col-12 col-md-6 mt-3 mt-mb-0"
               >
-                <h1 className="text-center mb-4">{t("login.enter")}</h1>
+                <h1 className="text-center mb-4">{t('login.enter')}</h1>
                 <Form.Group>
                   <FloatingLabel
                     controlId="username"
-                    label={t("login.username")}
+                    label={t('login.username')}
                     className="mb-3"
                   >
                     <Form.Control
@@ -85,7 +85,7 @@ const LoginPage = () => {
                       name="username"
                       autoComplete="username"
                       required
-                      placeholder={t("login.username")}
+                      placeholder={t('login.username')}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       isInvalid={authFailed}
@@ -96,7 +96,7 @@ const LoginPage = () => {
                 <Form.Group>
                   <FloatingLabel
                     controlId="password"
-                    label={t("login.password")}
+                    label={t('login.password')}
                     className="mb-3"
                   >
                     <Form.Control
@@ -104,14 +104,14 @@ const LoginPage = () => {
                       name="password"
                       autoComplete="current-password"
                       required
-                      placeholder={t("login.password")}
+                      placeholder={t('login.password')}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       isInvalid={authFailed}
                       value={formik.values.password}
                     />
                     <Form.Control.Feedback tooltip type="invalid">
-                      {t("login.invalid-input")}
+                      {t('login.invalid-input')}
                     </Form.Control.Feedback>
                   </FloatingLabel>
                 </Form.Group>
@@ -120,14 +120,15 @@ const LoginPage = () => {
                   variant="outline-primary"
                   className="w-100"
                 >
-                  {t("login.enter")}
+                  {t('login.enter')}
                 </Button>
               </Form>
             </Card.Body>
             <Card.Footer className="p-4">
               <div className="text-center">
-                <span>{t("login.no-account")}</span>{" "}
-                <a href="/signup">{t("login.registration")}</a>
+                <span>{t('login.no-account')}</span>
+                {' '}
+                <a href="/signup">{t('login.registration')}</a>
               </div>
             </Card.Footer>
           </Card>

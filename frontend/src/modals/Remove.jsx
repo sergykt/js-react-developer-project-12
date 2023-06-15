@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { Modal } from "react-bootstrap";
-import { useApi } from "../hooks/index.jsx";
-import { useTranslation } from "react-i18next";
-import { getExtraId } from "../slices/selectors.js";
-import { toast } from "react-toastify";
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import { useApi } from '../hooks/index.jsx';
+import { getExtraId } from '../slices/selectors.js';
 
 const Remove = ({ handleClose }) => {
   const api = useApi();

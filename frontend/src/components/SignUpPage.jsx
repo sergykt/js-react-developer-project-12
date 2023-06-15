@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 import {
   Button,
   Form,
@@ -7,16 +7,16 @@ import {
   Container,
   Card,
   FloatingLabel,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { useFormik } from "formik";
+} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useFormik } from 'formik';
 import { useRollbar } from '@rollbar/react';
-import { toast } from "react-toastify";
-import { useAuth } from "../hooks/index.jsx";
-import routes from "../routes.js";
-import * as yup from "yup";
-import axios from "axios";
+import { toast } from 'react-toastify';
+import * as yup from 'yup';
+import axios from 'axios';
+import { useAuth } from '../hooks/index.jsx';
+import routes from '../routes.js';
 
 const SignUpPage = () => {
   const auth = useAuth();
@@ -44,23 +44,23 @@ const SignUpPage = () => {
     confirmPassword: yup
       .string()
       .trim()
-      .oneOf([yup.ref("password")], 'sign-up.password-confirm-error'),
+      .oneOf([yup.ref('password')], 'sign-up.password-confirm-error'),
   });
 
   const formik = useFormik({
     initialValues: {
-      username: "",
-      password: "",
-      confirmPassword: "",
+      username: '',
+      password: '',
+      confirmPassword: '',
     },
     validationSchema: schema,
     onSubmit: async ({ username, password }, { setStatus }) => {
       try {
         const data = { username, password };
         const response = await axios.post(routes.createUserPath(), data);
-        localStorage.setItem("userId", JSON.stringify(response.data));
+        localStorage.setItem('userId', JSON.stringify(response.data));
         auth.logIn(response.data.username);
-        const from = { pathname: "/" };
+        const from = { pathname: '/' };
         navigate(from);
       } catch (err) {
         rollbar.error(err);
@@ -159,8 +159,8 @@ const SignUpPage = () => {
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       isInvalid={
-                        (errors.confirmPassword && touched.confirmPassword) ||
-                        !!status
+                        (errors.confirmPassword && touched.confirmPassword)
+                        || !!status
                       }
                       value={formik.values.confirmPassword}
                     />

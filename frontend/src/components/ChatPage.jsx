@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { Row, Col, Container } from "react-bootstrap";
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Row, Col, Container } from 'react-bootstrap';
 import { useRollbar } from '@rollbar/react';
-import { toast } from "react-toastify";
-import { actions } from '../slices/index.js';
-import ChannelsList from "./ChannelsList.jsx";
-import ChatBody from "./ChatBody.jsx";
+import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { actions } from '../slices/index.js';
+import ChannelsList from './ChannelsList.jsx';
+import ChatBody from './ChatBody.jsx';
 import routes from '../routes.js';
 
 const getAuthHeader = () => {
@@ -32,21 +32,20 @@ const ChatPage = () => {
           method: 'GET',
           headers: getAuthHeader(),
         });
-    
+
         dispatch(actions.setInitialState(response.data));
-      } catch(err) {
+      } catch (err) {
         rollbar.error(err);
         if (err.message === 'Network Error') {
           toast.error(t('network-error'));
-          return;
-        } 
-        
-        throw err;
+        } else {
+          throw err;
+        }
       }
     };
 
     requestData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container className="rounded shadow h-100 my-4 overflow-hidden">

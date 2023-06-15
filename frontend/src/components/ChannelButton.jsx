@@ -1,14 +1,11 @@
-import { Dropdown, ButtonGroup } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import cn from "classnames";
-import { useTranslation } from "react-i18next";
-import leoProfanity from "leo-profanity";
+import { Dropdown, ButtonGroup } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import cn from 'classnames';
+import { useTranslation } from 'react-i18next';
+import leoProfanity from 'leo-profanity';
 
-import { getCurrentChannelId } from "../slices/selectors";
-import { actions } from "../slices";
-
-leoProfanity.add(leoProfanity.getDictionary("ru"));
-leoProfanity.add(leoProfanity.getDictionary("en"));
+import { getCurrentChannelId } from '../slices/selectors';
+import { actions } from '../slices';
 
 const ChannelButton = ({ id, name, removable }) => {
   const dispatch = useDispatch();
@@ -18,16 +15,16 @@ const ChannelButton = ({ id, name, removable }) => {
   const isSelected = id === currentChannelId;
 
   const buttonClass = cn(
-    "w-100",
-    "rounded-0",
-    "text-start",
-    "btn",
-    "text-truncate",
+    'w-100',
+    'rounded-0',
+    'text-start',
+    'btn',
+    'text-truncate',
     {
-      "btn-secondary": isSelected,
-    }
+      'btn-secondary': isSelected,
+    },
   );
-  const toggleVariant = isSelected ? "secondary" : null;
+  const toggleVariant = isSelected ? 'secondary' : null;
 
   if (removable) {
     return (
@@ -41,20 +38,20 @@ const ChannelButton = ({ id, name, removable }) => {
           {leoProfanity.clean(name)}
         </button>
         <Dropdown.Toggle className="flex-grow-0" split variant={toggleVariant}>
-          <span class="visually-hidden">Управление каналом</span>
+          <span className="visually-hidden">{t('channels.toggle-menu')}</span>
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Item
             href="#"
             onClick={() => dispatch(actions.setModalRemove(id))}
           >
-            {t("channels.remove")}
+            {t('channels.remove')}
           </Dropdown.Item>
           <Dropdown.Item
             href="#"
             onClick={() => dispatch(actions.setModalRename(id))}
           >
-            {t("channels.rename")}
+            {t('channels.rename')}
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>

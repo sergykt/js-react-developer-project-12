@@ -20,7 +20,8 @@ const resources = {
         "remove": "Удалить",
         "created": "Канал создан",
         "removed": "Канал удалён",
-        "renamed": "Канал переименован", 
+        "renamed": "Канал переименован",
+        "toggle-menu": "Управление каналом",
       },
       "chat": {
         "message_one": "{{count}} сообщение",
@@ -62,7 +63,7 @@ const resources = {
         "submit": "Отправить",
         "submit-delete": "Удалить",
       },
-    }
+    },
   },
 };
 

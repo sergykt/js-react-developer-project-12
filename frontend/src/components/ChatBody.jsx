@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import { useFormik } from "formik";
-import { Form } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { useFormik } from 'formik';
+import { Form } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import leoProfanity from 'leo-profanity';
 
-import { useApi, useAuth } from "../hooks";
-import { getChannelMessages, getChannelName, getCurrentChannelId } from "../slices/selectors";
+import { useApi, useAuth } from '../hooks';
+import { getChannelMessages, getChannelName, getCurrentChannelId } from '../slices/selectors';
 
 leoProfanity.add(leoProfanity.getDictionary('ru'));
 leoProfanity.add(leoProfanity.getDictionary('en'));
@@ -28,7 +28,7 @@ const ChatBody = () => {
   const currentChannelId = useSelector(getCurrentChannelId);
   const currentChannel = useSelector(getChannelName);
   const messages = useSelector(getChannelMessages);
-  const username = auth.username;
+  const { username } = auth;
 
   const formik = useFormik({
     initialValues: {
@@ -43,7 +43,7 @@ const ChatBody = () => {
       try {
         await api.addMessage(newMessage);
         resetForm();
-      } catch(err) {
+      } catch (err) {
         setSubmitting(false);
       }
     },
@@ -54,17 +54,24 @@ const ChatBody = () => {
   });
 
   return (
-    <div className="d-flex flex-column h-100" >
+    <div className="d-flex flex-column h-100">
       <div className="bg-light mb-4 p-3 shadow-sm small">
         <p className="m-0">
-          <b># {currentChannel && currentChannel}</b>
+          <b>
+            #
+            {' '}
+            {currentChannel && currentChannel}
+          </b>
         </p>
         <span className="text-muted">{t('chat.message', { count: messages.length })}</span>
       </div>
       <div id="messages-box" className="chat-messages overflow-auto px-5" ref={chatRef}>
-        {messages.map(({ username, body, id }) => (
-          <div className="text-break mb-2" key={id}>
-            <b>{leoProfanity.clean(username)}</b>: {leoProfanity.clean(body)}
+        {messages.map((item) => (
+          <div className="text-break mb-2" key={item.id}>
+            <b>{leoProfanity.clean(item.username)}</b>
+            :
+            {' '}
+            {leoProfanity.clean(item.body)}
           </div>
         ))}
       </div>
